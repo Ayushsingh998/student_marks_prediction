@@ -49,6 +49,7 @@ function App() {
   const [prediction, setPrediction] = useState(null);
   const [explanation, setExplanation] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [recLoading, setRecLoading] = useState(false);
   const [error, setError] = useState("");
 
   const comparisonData = useMemo(
@@ -163,6 +164,11 @@ function App() {
       return;
     }
 
+    if (!prediction) {
+      setError("Please predict marks first before requesting recommendations");
+      return;
+    }
+
     const payload = {
       attendance: Number.parseInt(form.attendance, 10),
       internal_test_1: Number.parseInt(form.internal_test_1, 10),
@@ -171,9 +177,11 @@ function App() {
       daily_study_hours: Number.parseInt(form.daily_study_hours, 10),
       previous_year_marks_pct: Number.parseInt(form.previous_year_marks_pct, 10),
       target_marks: targetNum,
+      predicted_marks: prediction.predicted_marks,
+      shap_values: prediction.shap_values,
     };
 
-    setLoading(true);
+    setRecLoading(true);
     setError("");
     try {
       const response = await fetch(`${API_URL}/explain`, {
@@ -187,7 +195,7 @@ function App() {
     } catch {
       setError("Could not load recommendations.");
     } finally {
-      setLoading(false);
+      setRecLoading(false);
     }
   };
 
@@ -224,6 +232,7 @@ function App() {
             targetError={targetError}
             prediction={prediction}
             loading={loading}
+            recLoading={recLoading}
             error={error}
             onChange={handleChange}
             onTarget={(value) => {
@@ -297,10 +306,10 @@ function HomePage(props) {
                 />
                 {props.targetError && <span className="inline-error">{props.targetError}</span>}
               </label>
-              <button type="button" onClick={props.onRecommendations} disabled={props.loading}>
-                Recommendations
+              <button type="button" onClick={props.onRecommendations} disabled={props.loading || props.recLoading}>
+                {props.recLoading ? "Loading..." : "Recommendations"}
               </button>
-              <button type="button" className="secondary" onClick={props.onAnalysis}>Detailed Analysis</button>
+              <button type="button" className="secondary" onClick={props.onAnalysis} disabled={props.recLoading}>Detailed Analysis</button>
             </>
           ) : (
             <p className="muted">Enter student details and click Predict to calculate predicted marks.</p>
@@ -349,7 +358,10 @@ function InfluencingFactors({ factors }) {
                     <div className="factor-card positive-card">
                       <div className="factor-title">
                         <strong>{positive[index].factor}</strong>
-                        <span className="val-badge">{positive[index].value}</span>
+                        <span className="val-badge">
+                          {positive[index].value}
+                          {positive[index].shap_impact !== undefined && ` (${positive[index].shap_impact > 0 ? `+${positive[index].shap_impact}` : positive[index].shap_impact} pts)`}
+                        </span>
                       </div>
                       <p className="factor-reason">{positive[index].reason}</p>
                     </div>
@@ -362,7 +374,10 @@ function InfluencingFactors({ factors }) {
                     <div className="factor-card neutral-card">
                       <div className="factor-title">
                         <strong>{neutral[index].factor}</strong>
-                        <span className="val-badge">{neutral[index].value}</span>
+                        <span className="val-badge">
+                          {neutral[index].value}
+                          {neutral[index].shap_impact !== undefined && ` (${neutral[index].shap_impact > 0 ? `+${neutral[index].shap_impact}` : neutral[index].shap_impact} pts)`}
+                        </span>
                       </div>
                       <p className="factor-reason">{neutral[index].reason}</p>
                     </div>
@@ -375,7 +390,10 @@ function InfluencingFactors({ factors }) {
                     <div className="factor-card negative-card">
                       <div className="factor-title">
                         <strong>{negative[index].factor}</strong>
-                        <span className="val-badge">{negative[index].value}</span>
+                        <span className="val-badge">
+                          {negative[index].value}
+                          {negative[index].shap_impact !== undefined && ` (${negative[index].shap_impact > 0 ? `+${negative[index].shap_impact}` : negative[index].shap_impact} pts)`}
+                        </span>
                       </div>
                       <p className="factor-reason">{negative[index].reason}</p>
                     </div>
@@ -416,9 +434,7 @@ function RecommendationsPage({ explanation, onHome }) {
               <tr>
                 <th>Factor</th>
                 <th>What To Improve</th>
-                <th>Priority</th>
-                <th>Expected Value</th>
-                <th>Improvement</th>
+                <th>Expected Target</th>
               </tr>
             </thead>
             <tbody>
@@ -426,9 +442,7 @@ function RecommendationsPage({ explanation, onHome }) {
                 <tr key={item.feature}>
                   <td>{item.feature}</td>
                   <td>{item.recommendation}</td>
-                  <td><span className={`priority-text ${item.priority.toLowerCase()}`}>{item.priority}</span></td>
                   <td>{item.category === "context" ? "Context only" : item.expected_value}</td>
-                  <td>{item.category === "context" ? "Not changeable" : item.improvement_needed}</td>
                 </tr>
               ))}
             </tbody>
@@ -517,8 +531,15 @@ function AnalysisPage({ prediction, explanation, comparisonData, radarData, onHo
                 <Radar name="Target Expected (%)" dataKey="expectedPct" stroke="#2a4d88" fill="#2a4d88" fillOpacity={0.25} />
                 <Tooltip
                   formatter={(value, name, item) => {
-                    const raw = name.includes("Current") ? item.payload.currentRaw : item.payload.expectedRaw;
-                    return [`${value}% (${raw} / ${item.payload.max})`, name];
+                    if (name.includes("Current")) {
+                      const raw = item.payload.currentRaw;
+                      const max = item.payload.max;
+                      return [`${raw}/${max} × 100 = ${value}%`, name];
+                    } else {
+                      const raw = item.payload.expectedRaw;
+                      const max = item.payload.max;
+                      return [`${raw}/${max} × 100 = ${value}%`, name];
+                    }
                   }}
                 />
               </RadarChart>

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -27,7 +27,8 @@ class StudentInput(BaseModel):
 
 class PredictionOutput(BaseModel):
     predicted_marks: float
-    confidence: float
+    base_value: float
+    shap_values: Dict[str, float]
     influencing_factors: dict
 
 
@@ -40,10 +41,21 @@ class TargetInput(StudentInput):
         return int(float(value))
 
 
+class ExplainRequest(StudentInput):
+    target_marks: int = Field(..., ge=0, le=100)
+    predicted_marks: float = Field(...)
+    shap_values: Dict[str, float] = Field(...)
+
+    @field_validator("target_marks", mode="before")
+    @classmethod
+    def convert_target_to_int(cls, value):
+        return int(float(value))
+
+
 class FeatureAdvice(BaseModel):
     feature: str
     current: int
-    benchmark: int
+    benchmark: int = 0
     expected_value: int
     recommendation: str
     impact: float
