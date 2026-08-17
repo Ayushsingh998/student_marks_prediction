@@ -6,7 +6,7 @@ export default function ComparisonBarChart({ data }) {
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="feature" />
+        <XAxis dataKey="feature" interval={0} tick={{ fontSize: 11 }} />
         <YAxis />
         <Tooltip />
         <Bar dataKey="current" name="Current Value" fill="#7c94b8" radius={[4, 4, 0, 0]} />

@@ -4,12 +4,12 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class StudentInput(BaseModel):
-    attendance: int = Field(..., ge=0, le=100)
-    internal_test_1: int = Field(..., ge=0, le=40)
-    internal_test_2: int = Field(..., ge=0, le=40)
-    assignment_score: int = Field(..., ge=0, le=10)
-    daily_study_hours: int = Field(..., ge=1, le=5)
-    previous_year_marks_pct: int = Field(..., ge=0, le=100)
+    attendance: float = Field(..., ge=0, le=100)
+    internal_test_1: float = Field(..., ge=0, le=40)
+    internal_test_2: float = Field(..., ge=0, le=40)
+    assignment_score: float = Field(..., ge=0, le=10)
+    daily_study_hours: float = Field(..., ge=0, le=24)
+    previous_year_marks_pct: float = Field(..., ge=0, le=100)
 
     @field_validator(
         "attendance",
@@ -21,8 +21,8 @@ class StudentInput(BaseModel):
         mode="before",
     )
     @classmethod
-    def convert_to_int(cls, value):
-        return int(float(value))
+    def convert_to_float(cls, value):
+        return round(float(value), 2)
 
 
 class PredictionOutput(BaseModel):
@@ -33,34 +33,34 @@ class PredictionOutput(BaseModel):
 
 
 class TargetInput(StudentInput):
-    target_marks: int = Field(..., ge=0, le=100)
+    target_marks: float = Field(..., ge=0, le=100)
 
     @field_validator("target_marks", mode="before")
     @classmethod
-    def convert_target_to_int(cls, value):
-        return int(float(value))
+    def convert_target_to_float(cls, value):
+        return round(float(value), 2)
 
 
 class ExplainRequest(StudentInput):
-    target_marks: int = Field(..., ge=0, le=100)
+    target_marks: float = Field(..., ge=0, le=100)
     predicted_marks: float = Field(...)
     shap_values: Dict[str, float] = Field(...)
 
     @field_validator("target_marks", mode="before")
     @classmethod
-    def convert_target_to_int(cls, value):
-        return int(float(value))
+    def convert_target_to_float(cls, value):
+        return round(float(value), 2)
 
 
 class FeatureAdvice(BaseModel):
     feature: str
-    current: int
-    benchmark: int = 0
-    expected_value: int
+    current: float
+    benchmark: float = 0.0
+    expected_value: float
     recommendation: str
     impact: float
     priority: str
-    improvement_needed: int
+    improvement_needed: float
     category: str = "controllable"
 
 

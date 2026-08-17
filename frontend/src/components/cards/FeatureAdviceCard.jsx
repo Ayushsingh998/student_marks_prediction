@@ -18,12 +18,12 @@ export default function FeatureAdviceCard({ item }) {
         </div>
         <div className="metric-box">
           <span className="metric-label">Expected Target</span>
-          <span className="metric-val">{item.category === "context" ? "N/A" : item.expected_value}</span>
+          <span className="metric-val">{item.category === "context" ? "Context only" : item.expected_value}</span>
         </div>
         <div className="metric-box">
           <span className="metric-label">Improvement</span>
-          <span className={`metric-val ${item.improvement_needed > 0 ? "highlight" : ""}`}>
-            {item.category === "context" ? "None" : item.improvement_needed > 0 ? `+${item.improvement_needed}` : "On Target"}
+          <span className={`metric-val ${item.improvement_needed > 0 && item.category !== "context" ? "highlight" : ""}`}>
+            {item.category === "context" ? "Context only" : item.improvement_needed > 0 ? `+${item.improvement_needed}` : "On Target"}
           </span>
         </div>
       </div>

@@ -5,9 +5,9 @@ export function validateForm(form, fields) {
     if (val === "" || val === null || val === undefined) {
       errors[field.key] = `${field.label.split(" ")[0]} is required`;
     } else {
-      const num = Number.parseInt(val, 10);
+      const num = Number.parseFloat(val);
       if (Number.isNaN(num)) {
-        errors[field.key] = "Enter a valid integer";
+        errors[field.key] = "Enter a valid number";
       } else if (num < field.min || num > field.max) {
         errors[field.key] = `Must be between ${field.min} and ${field.max}`;
       }

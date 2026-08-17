@@ -2,9 +2,9 @@ import React from "react";
 import { fields } from "../../constants/fields";
 import FormField from "./FormField";
 
-export default function StudentForm({ form, fieldErrors, onChange, onPredict, loading, error }) {
+export default function StudentForm({ form, fieldErrors, onChange }) {
   return (
-    <form className="panel form" onSubmit={(event) => event.preventDefault()}>
+    <div className="form-grid">
       {fields.map((field) => (
         <FormField
           key={field.key}
@@ -14,10 +14,6 @@ export default function StudentForm({ form, fieldErrors, onChange, onPredict, lo
           onChange={onChange}
         />
       ))}
-      <button type="button" onClick={onPredict} disabled={loading}>
-        Predict
-      </button>
-      {error && <p className="error">{error}</p>}
-    </form>
+    </div>
   );
 }

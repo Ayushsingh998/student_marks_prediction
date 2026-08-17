@@ -68,7 +68,10 @@ def main():
         pickle.dump(model, file)
     print(f"Model successfully saved to {MODEL_PATH}")
 
-    explainer = shap.Explainer(model.predict, x_train)
+    scaler = model.named_steps["scaler"]
+    lin_model = model.named_steps["model"]
+    scaled_x_train = scaler.transform(x_train)
+    explainer = shap.LinearExplainer(lin_model, scaled_x_train, feature_names=FEATURES)
     with EXPLAINER_PATH.open("wb") as file:
         pickle.dump(explainer, file)
     print(f"SHAP explainer successfully saved to {EXPLAINER_PATH}")

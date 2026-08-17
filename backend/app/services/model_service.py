@@ -73,7 +73,7 @@ class MLService:
                 detail="Trained ML model or SHAP explainer not found. Please run backend/ml/shap_train.py first.",
             )
 
-        msg = "🔮 Running ML prediction for student..."
+        msg = "Running ML prediction for student..."
         logger.info(msg)
         print(msg)
         frame = self.to_frame(student)
@@ -84,7 +84,12 @@ class MLService:
             logger.info(msg)
             print(msg)
 
-            shap_output = self.explainer(frame)
+            if hasattr(self.model, "named_steps") and "scaler" in self.model.named_steps and isinstance(self.explainer, shap.LinearExplainer):
+                scaled_frame = self.model.named_steps["scaler"].transform(frame)
+                shap_output = self.explainer(scaled_frame)
+            else:
+                shap_output = self.explainer(frame)
+
             base_value = round(float(shap_output.base_values[0]), 2)
             raw_shap_values = shap_output.values[0]
 

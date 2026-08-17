@@ -109,7 +109,10 @@ h1 {
 }
 
 h2 {
-  font-size: 1.12rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #2a4d88;
+  letter-spacing: -0.2px;
 }
 
 .panel {
@@ -245,11 +248,10 @@ button:disabled {
   min-height: 85px;
   border-radius: 8px;
   padding: 14px 18px;
-  color: white;
-  background: #2a4d88;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border: 1px solid #cbd5e1;
 }
 
 .gap-card {
@@ -276,12 +278,35 @@ button:disabled {
   font-weight: 800;
 }
 
+/* Light Red, Yellow, and Green Risk Cards */
+.risk-card.high {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.risk-card.high span {
+  color: #991b1b;
+}
+
 .risk-card.medium {
-  background: #7c94b8;
+  background: #fef9c3;
+  border-color: #fde047;
+  color: #b45309;
+}
+
+.risk-card.medium span {
+  color: #92400e;
 }
 
 .risk-card.low {
-  background: #5d7294;
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.risk-card.low span {
+  color: #166534;
 }
 
 .table-wrap {
@@ -564,6 +589,157 @@ th {
   max-width: 560px;
 }
 
+/* Action Buttons & Target Input Styling */
+.target-input-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.action-buttons-group {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 18px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #2a4d88;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1e3a68;
+}
+
+.btn-secondary {
+  background: #eef2f7;
+  color: #2a4d88;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover {
+  background: #d9e2ec;
+}
+
+.prediction-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.score-subtitle {
+  font-weight: 800;
+  color: #2a4d88;
+  margin-top: 4px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.prediction-meta {
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+}
+
+.meta-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.meta-val {
+  font-weight: 800;
+  color: #17233a;
+}
+
+.meta-val.highlight {
+  color: #2a4d88;
+}
+
+.summary-paragraph-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2a4d88;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.summary-para-title {
+  margin: 0 0 8px 0;
+  color: #2a4d88;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.summary-para-text {
+  margin: 0;
+  line-height: 1.65;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+/* Prediction Action & Target Layout */
+.predict-action-box {
+  margin-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.after-prediction-section {
+  width: 100%;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Step-by-Step Bottom Page Navigation Footer */
+.page-nav-footer {
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.page-nav-footer.align-right {
+  justify-content: flex-end;
+}
+
+.page-nav-footer.split {
+  justify-content: space-between;
+}
+
 @media (max-width: 900px) {
   .shell {
     grid-template-columns: 1fr;
@@ -585,7 +761,11 @@ th {
   .grid,
   .metrics,
   .analysis-grid,
-  .form {
+  .form,
+  .action-buttons-group,
+  .page-nav-footer.split {
     grid-template-columns: 1fr;
+    flex-direction: column;
+    gap: 10px;
   }
 }

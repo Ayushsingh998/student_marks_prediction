@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import Sidebar from "./components/layout/Sidebar";
 import BackButton from "./components/layout/BackButton";
 import PredictPage from "./pages/PredictPage";
+import InfluencingFactorsPage from "./pages/InfluencingFactorsPage";
 import RecommendationsPage from "./pages/RecommendationsPage";
 import InsightsPage from "./pages/InsightsPage";
 import { fields, initialForm } from "./constants/fields";
@@ -31,41 +32,46 @@ export default function App() {
   const radarData = useMemo(() => toRadarData(explanation?.feature_advice), [explanation]);
 
   const handleChange = (key, value) => {
-    // Only allow digits to be typed
-    const cleanValue = value.replace(/\D/g, "");
+    // Allow digits and at most one decimal point
+    let cleanValue = value.replace(/[^0-9.]/g, "");
+    const parts = cleanValue.split(".");
+    if (parts.length > 2) {
+      cleanValue = parts[0] + "." + parts.slice(1).join("");
+    }
     setForm((current) => ({ ...current, [key]: cleanValue }));
-    // Clear inline field error as user edits, but DO NOT clear previous prediction!
     if (fieldErrors[key]) {
       setFieldErrors((current) => ({ ...current, [key]: "" }));
     }
   };
 
   const buildPayload = () => ({
-    attendance: Number.parseInt(form.attendance, 10),
-    internal_test_1: Number.parseInt(form.internal_test_1, 10),
-    internal_test_2: Number.parseInt(form.internal_test_2, 10),
-    assignment_score: Number.parseInt(form.assignment_score, 10),
-    daily_study_hours: Number.parseInt(form.daily_study_hours, 10),
-    previous_year_marks_pct: Number.parseInt(form.previous_year_marks_pct, 10),
+    attendance: Number.parseFloat(form.attendance) || 0,
+    internal_test_1: Number.parseFloat(form.internal_test_1) || 0,
+    internal_test_2: Number.parseFloat(form.internal_test_2) || 0,
+    assignment_score: Number.parseFloat(form.assignment_score) || 0,
+    daily_study_hours: Number.parseFloat(form.daily_study_hours) || 0,
+    previous_year_marks_pct: Number.parseFloat(form.previous_year_marks_pct) || 0,
   });
 
-  const predict = async () => {
+  // Button 1: Predict (return predict only)
+  const predictOnly = async () => {
     const errors = validateForm(form, fields);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
     const data = await runPrediction(buildPayload());
-    if (data) setExplanation(null); // Reset recommendations for new prediction until user requests them
+    if (data) setExplanation(null);
   };
 
-  const getRecommendations = async () => {
+  // Button 2: Show recommendations & detailed analysis (gives influencing factors, recommendations and analysis)
+  const getRecommendationsAndAnalysis = async () => {
     if (!targetMarks) {
-      setTargetError("Target marks is required");
+      setTargetError("Target marks is required for recommendations & analysis");
       return;
     }
-    const targetNum = Number.parseInt(targetMarks, 10);
+    const targetNum = Number.parseFloat(targetMarks);
     if (Number.isNaN(targetNum) || targetNum < 0 || targetNum > 100) {
-      setTargetError("Must be between 0 and 100");
+      setTargetError("Target marks must be between 0 and 100");
       return;
     }
     setTargetError("");
@@ -74,20 +80,21 @@ export default function App() {
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    if (!prediction) {
-      setRecError("Please predict marks first before requesting recommendations");
-      return;
+    let activePred = prediction;
+    if (!activePred) {
+      activePred = await runPrediction(buildPayload());
+      if (!activePred) return;
     }
 
     const payload = {
       ...buildPayload(),
       target_marks: targetNum,
-      predicted_marks: prediction.predicted_marks,
-      shap_values: prediction.shap_values,
+      predicted_marks: activePred.predicted_marks,
+      shap_values: activePred.shap_values,
     };
 
     const data = await runExplanation(payload);
-    if (data) setPage("recommendations");
+    if (data) setPage("factors");
   };
 
   return (
@@ -96,6 +103,7 @@ export default function App() {
 
       <main className="app">
         {page !== "home" && <BackButton onClick={() => setPage("home")} />}
+
         {page === "home" && (
           <PredictPage
             form={form}
@@ -108,15 +116,34 @@ export default function App() {
             error={error || recError}
             onChange={handleChange}
             onTarget={(value) => {
-              setTargetMarks(value.replace(/\D/g, ""));
+              let cleanVal = value.replace(/[^0-9.]/g, "");
+              const parts = cleanVal.split(".");
+              if (parts.length > 2) cleanVal = parts[0] + "." + parts.slice(1).join("");
+              setTargetMarks(cleanVal);
               if (targetError) setTargetError("");
             }}
-            onPredict={predict}
-            onRecommendations={getRecommendations}
-            onAnalysis={() => setPage("analysis")}
+            onPredict={predictOnly}
+            onRecommendationsAndAnalysis={getRecommendationsAndAnalysis}
           />
         )}
-        {page === "recommendations" && <RecommendationsPage explanation={explanation} onHome={() => setPage("home")} />}
+
+        {page === "factors" && (
+          <InfluencingFactorsPage
+            prediction={prediction}
+            explanation={explanation}
+            onHome={() => setPage("home")}
+            onNavigate={setPage}
+          />
+        )}
+
+        {page === "recommendations" && (
+          <RecommendationsPage
+            explanation={explanation}
+            onHome={() => setPage("home")}
+            onNavigate={setPage}
+          />
+        )}
+
         {page === "analysis" && (
           <InsightsPage
             prediction={prediction}
@@ -124,6 +151,7 @@ export default function App() {
             comparisonData={comparisonData}
             radarData={radarData}
             onHome={() => setPage("home")}
+            onNavigate={setPage}
           />
         )}
       </main>

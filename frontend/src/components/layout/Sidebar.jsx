@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, LayoutDashboard, BarChart3 } from "lucide-react";
+import { Home, Sliders, LayoutDashboard, BarChart3 } from "lucide-react";
 
 export default function Sidebar({ page, onNavigate }) {
   return (
@@ -8,6 +8,10 @@ export default function Sidebar({ page, onNavigate }) {
       <button className={page === "home" ? "nav active" : "nav"} onClick={() => onNavigate("home")}>
         <Home size={18} />
         Home
+      </button>
+      <button className={page === "factors" ? "nav active" : "nav"} onClick={() => onNavigate("factors")}>
+        <Sliders size={18} />
+        Influencing Factors
       </button>
       <button className={page === "recommendations" ? "nav active" : "nav"} onClick={() => onNavigate("recommendations")}>
         <LayoutDashboard size={18} />

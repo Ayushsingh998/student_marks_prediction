@@ -12,17 +12,17 @@ router = APIRouter()
 def explain_prediction(payload: ExplainRequest):
     msg = "explain endpoint called"
     logger.info(msg)
-    print(msg)
+    print(msg, flush=True)
     try:
         result = explainer_service.explain(payload)
-        print(f"Response ready to return: {type(result)}")
+        print(f"Response ready to return: {type(result)}", flush=True)
         return result
     except Exception as err:
         msg = f"explain error: {err}"
         logger.error(msg)
-        print(msg)
+        print(msg, flush=True)
         import traceback
-        print(traceback.format_exc())
+        print(traceback.format_exc(), flush=True)
         raise HTTPException(
             status_code=500,
             detail=f"Error generating recommendations: {str(err)}"
