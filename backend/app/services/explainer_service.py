@@ -51,7 +51,7 @@ FEATURE_CONFIG = [
 ]
 
 
-class ShapService:
+class RecommendationsService:
     def explain(self, payload: ExplainRequest) -> dict:
         prediction = payload.predicted_marks
         shap_values: Dict[str, float] = payload.shap_values
@@ -277,4 +277,4 @@ class ShapService:
         return f"{para1}\n\n{para2}"
 
 
-explainer_service = ShapService()
+recommendations_service = RecommendationsService()

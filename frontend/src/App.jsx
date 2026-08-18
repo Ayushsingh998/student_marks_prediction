@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "./components/layout/Sidebar";
 import BackButton from "./components/layout/BackButton";
 import PredictPage from "./pages/PredictPage";
@@ -13,6 +13,10 @@ import { useExplanation } from "./hooks/useExplanation";
 
 export default function App() {
   const [page, setPage] = useState("home");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [page]);
   const [form, setForm] = useState(initialForm);
   const [fieldErrors, setFieldErrors] = useState({});
   const [targetMarks, setTargetMarks] = useState("");

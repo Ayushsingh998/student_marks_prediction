@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.student import ExplanationOutput, ExplainRequest
-from app.services.explainer_service import explainer_service
+from app.services.explainer_service import recommendations_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -14,7 +14,7 @@ def explain_prediction(payload: ExplainRequest):
     logger.info(msg)
     print(msg, flush=True)
     try:
-        result = explainer_service.explain(payload)
+        result = recommendations_service.explain(payload)
         print(f"Response ready to return: {type(result)}", flush=True)
         return result
     except Exception as err:
