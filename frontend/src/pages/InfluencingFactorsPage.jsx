@@ -25,7 +25,7 @@ export default function InfluencingFactorsPage({ prediction, explanation, onHome
         />
       </section>
 
-      <div className="page-nav-footer align-right">
+      <div className="page-nav-footer">
         <button
           type="button"
           className="btn btn-primary"
